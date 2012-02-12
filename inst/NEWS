@@ -1,0 +1,25 @@
+Changes in version 1.01 (2012-02-12):
+
+NEW FEATURES
+
+    o The 'threeDarr' function is added.  This creates three-dimensional
+      arrays out of matrices.
+
+CHANGES
+
+    o 'var.shrink.eqcor' and 'factor.model.stat' have a new argument
+      'verbose' that controls whether some warnings are given.  Both
+      functions can warn if there are no negative values in the input
+      'x' -- an indication in finance that prices rather than returns
+      are given.  Warnings in 'factor.model.stat' about constant
+      columns in 'x' and negative specific variances are also controlled.
+
+    o 'var.add.benchmark' has a new argument 'sum.to.one' that allows
+      a "benchmark" to have weights that sum to something other than
+      one.  An example is to give portfolio weights minus benchmark
+      weights.
+
+BUG FIXES
+
+    o (none)
+
