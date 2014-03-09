@@ -1,8 +1,8 @@
 "var.add.benchmark" <-
 function (variance, benchmark.weights, name="benchmark", sum.to.one=TRUE) 
 {
-        fun.copyright <- "Placed in the public domain 2009-2012 by  Burns Statistics Ltd."
-	fun.version <- "var.add.benchmark 004"
+        fun.copyright <- "Placed in the public domain 2009-2014 by  Burns Statistics Ltd."
+	fun.version <- "var.add.benchmark 005"
 
 	subfun.varadd <- function(varmat, lwt, p, pseq)
 	{
@@ -47,7 +47,8 @@ function (variance, benchmark.weights, name="benchmark", sum.to.one=TRUE)
 	if(sum.to.one && abs(sum(abs(benchmark.weights)) - 1) > 1e-10) {
 		wsum <- sum(abs(benchmark.weights))
 		warning(paste("absolute of 'benchmark.weights' sums to", wsum,
-			" adjusting so it sums to 1"))
+			" adjusting so it sums to 1",
+			"-- use 'sum.to.one=FALSE' to avoid adjustment"))
 		benchmark.weights <- benchmark.weights / wsum
 	}
 

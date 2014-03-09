@@ -1,10 +1,10 @@
 "var.shrink.eqcor" <-
-function (x, weights=seq(1, 3, length=nt), shrink=NULL, center=TRUE, 
-	vol.shrink=0, sd.min=20, quan.sd=0.9, tol=0.001, compatible=FALSE,
+function (x, weights=seq(0.5, 1.5, length=nt), shrink=NULL, center=TRUE, 
+	vol.shrink=0, sd.min=20, quan.sd=0.9, tol=1e-4, compatible=FALSE,
 	verbose=2) 
 {
-	fun.copyright <- "Placed in the public domain 2009-2012 by Burns Statistics Ltd."
-	fun.version <- "var.shrink.eqcor 003"
+	fun.copyright <- "Placed in the public domain 2009-2014 by Burns Statistics Ltd."
+	fun.version <- "var.shrink.eqcor 004"
 
 	x <- as.matrix(x)
 	nassets <- ncol(x)
@@ -20,6 +20,7 @@ function (x, weights=seq(1, 3, length=nt), shrink=NULL, center=TRUE,
 			"(warning suppressed with verbose < 1)"))
 	}
 
+	if(is.null(weights)) weights <- rep(1, nt)
 	if(any(weights < 0)) {
 		stop(paste(sum(weights < 0), "negative value(s) in 'weights'"))
 	}
@@ -78,8 +79,8 @@ function (x, weights=seq(1, 3, length=nt), shrink=NULL, center=TRUE,
 			"of length", nassets, "-- given has mode",
 			mode(center), "and length", length(center)))
 	}
-	xcen <- sweep(x, 2, center, "-")
-	svar <- var(xcen * sqrt(weights), use='pairwise')
+	x <- sweep(x, 2, center, "-")
+	svar <- var(x * sqrt(weights), use='pairwise')
 	if(compatible) {
 		# to match Ledoit-Wolf code, do rescaling as in next line
 		svar <- svar * (nt - 1) / nt
@@ -87,7 +88,7 @@ function (x, weights=seq(1, 3, length=nt), shrink=NULL, center=TRUE,
 			warning("in compatible mode but time weighting")
 		}
 	}
-	svarred <- svar[good, good, drop=FALSE]
+	svar.sup <- svar[good, good, drop=FALSE]
 	sdiag <- sqrt(diag(svar))
 	sdiag[!good] <- quantile(sdiag[good], quan.sd)
 	if(vol.shrink > 0) {
@@ -95,12 +96,14 @@ function (x, weights=seq(1, 3, length=nt), shrink=NULL, center=TRUE,
 		meanvol <- mean(sdiag)
 		sdiag <- vol.shrink * meanvol + (1 - vol.shrink) * sdiag
 	}
-	meancor <- mean(cov2cor(svarred)[lower.tri(svarred, diag=FALSE)])
+	meancor <- mean(cov2cor(svar.sup)[which(lower.tri(svar.sup, 
+		diag=FALSE))])
 	prior <- svar
 	prior[] <- meancor
 	diag(prior) <- 1
 	prior <- sdiag * prior * rep(sdiag, each=nassets)
-	svar[is.na(svar)] <- prior[is.na(svar)]
+	svar.sup <- which(is.na(svar))
+	svar[svar.sup] <- prior[svar.sup]
 	if(length(shrink) != 1) {
 		if(length(shrink)) {
 			if(!is.numeric(shrink)) {
@@ -114,12 +117,12 @@ function (x, weights=seq(1, 3, length=nt), shrink=NULL, center=TRUE,
 				"or a single numeric value"))
 		}
 		gamma <- sum((svar - prior)^2)
-		xcen[is.na(xcen)] <- 0
+		x[which(is.na(x))] <- 0
 		pi.mat <- theta1.mat <- theta2.mat <- array(0, 
 			c(nassets, nassets))
 		for(i in 1:nt) {
 			this.wt <- weights[i]
-			this.cross <- crossprod(xcen[i, , drop=FALSE]) - svar
+			this.cross <- crossprod(x[i, , drop=FALSE]) - svar
 			pi.mat <- pi.mat + this.wt * this.cross^2
 			theta1.mat <- theta1.mat + this.wt * 
 				diag(this.cross) * this.cross
@@ -136,6 +139,8 @@ function (x, weights=seq(1, 3, length=nt), shrink=NULL, center=TRUE,
 		rho <- sum(diag(pi.mat)) / nt + meancor * 0.5 * 
 			(sum(theta1.mat) + sum(theta2.mat))
 		shrink <- (pi.hat - rho) / gamma / nt
+		# allow memory clean up
+		pi.mat <- theta1.mat <- theta2.mat <- this.cross <- NULL
 	} else {
 		if(!is.numeric(shrink)) {
 			stop(paste("'shrink' should be either NULL or",
@@ -147,19 +152,21 @@ function (x, weights=seq(1, 3, length=nt), shrink=NULL, center=TRUE,
 		}
 	}
 	shrink <- min(1, max(0, shrink))
-	ans <- shrink * prior + (1 - shrink) * svar
+	
+	# overwrite svar to save space
+	svar <- shrink * prior + (1 - shrink) * svar
 
 	if(tol > 0 || any(is.na(x))) {
-		eig <- eigen(ans, symmetric=TRUE)
-		tol <- tol * max(eig$values)
-		if(min(eig$values) < tol) {
-			vals <- eig$values
-			vals[vals < tol] <- tol
-			ans[] <- eig$vectors %*% (vals * t(eig$vectors))
+		svar.sup <- eigen(svar, symmetric=TRUE)
+		tol <- tol * max(svar.sup$values)
+		if(min(svar.sup$values) < tol) {
+			vals <- svar.sup$values
+			vals[which(vals < tol)] <- tol
+			svar[] <- svar.sup$vectors %*% (vals * t(svar.sup$vectors))
 		}
 	}
-	attr(ans, "shrink") <- shrink
-	attr(ans, "timestamp") <- date()
-	ans
+	attr(svar, "shrink") <- shrink
+	attr(svar, "timestamp") <- date()
+	svar
 }
 

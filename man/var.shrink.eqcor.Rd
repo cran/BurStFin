@@ -2,12 +2,13 @@
 \alias{var.shrink.eqcor}
 \title{Ledoit-Wolf Shrinkage Variance Estimate }
 \description{
-Returns a variance matrix that shrinks towards the equal correlation matrix.
+Returns a variance matrix that shrinks towards the equal correlation 
+matrix -- a Ledoit-Wolf estimate.
 }
 \usage{
-var.shrink.eqcor(x, weights = seq(1, 3, length = nt), shrink = NULL, 
+var.shrink.eqcor(x, weights = seq(0.5, 1.5, length = nt), shrink = NULL, 
 	center = TRUE, vol.shrink = 0, sd.min = 20, quan.sd = 0.9, 
-	tol = 0.001, compatible = FALSE, verbose=2)
+	tol = 1e-4, compatible = FALSE, verbose=2)
 }
 \arguments{
   \item{x}{ 
@@ -23,8 +24,12 @@ var.shrink.eqcor(x, weights = seq(1, 3, length = nt), shrink = NULL,
 	A column may even have all missing values.
 }
   \item{weights}{ 
-	a numeric vector giving the observation weights.
-	Either the single number 1 (meaning equal weighting), or a
+	a numeric vector giving the observation weights, or \code{NULL}.
+
+	Equal weights can be specified with \code{NULL} or with a 
+	single positive number.
+
+	Otherwise, this must be a
 	vector of non-negative numbers that is as long as the number
 	of observations (rows of \code{x}).
 }
@@ -126,12 +131,13 @@ number 4.
 }
 
 \section{Revision }{
-This help was last revised 2012 January 20.
+This help was last revised 2014 March 09.
 }
 
 \author{ Burns Statistics }
 
-\seealso{ \code{\link{factor.model.stat}}, \code{cov.wt}.
+\seealso{ \code{\link{factor.model.stat}}, \code{cov.wt},
+	\code{\link{slideWeight}}.
 }
 \examples{
 \dontrun{

@@ -1,3 +1,46 @@
+Changes in version 1.02 (2014-03-09)
+
+NEW FEATURES
+
+    o The 'slideWeight' function is added.  This creates a vector 
+      suitable to use as time weights -- for example, the 'weights'
+      argument to 'var.shrink.eqcor' or 'factor.model.stat'.
+
+NON-BACKWARD COMPATIBLE
+
+    o if in 'factor.model.stat' the 'constant.returns.okay' 
+      argument is 'TRUE', then any columns with constant values
+      now get a variance of zero rather than the default variance 
+      for an all missing column.  The previous behavior could 
+      arguably be considered a bug.
+
+CHANGES
+
+    o the default value of 'tol' in 'var.shrink.eqcor' is now
+      1e-4 instead of 1e-3.  This is still a guess, but it seems 
+      to be a better guess.
+
+    o equal time weights can be specified with 'weight=NULL'
+      in 'factor.model.stat' and 'var.shrink.eqcor'.
+
+    o 'cumulative.variance.fraction' is a new component of the result of
+      'factor.model.stat' when its output is the factor model.
+
+    o 'constant.names' is a new component of the result of
+      'factor.model.stat' when its output is the factor model.
+
+BUG FIXES
+
+    o The 'x' in 'factor.model.stat' is immediately coerced with
+      'as.matrix' to avoid subsetting problems with some data types,
+      'timeSeries' for instance.
+
+    o A second attempt is made with 'svd' inside 'factor.model.stat'
+      if the first attempt fails to converge. 
+      It also does a sanity check on the result of 'svd'.
+
+
+
 Changes in version 1.01 (2012-02-12):
 
 NEW FEATURES

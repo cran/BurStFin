@@ -1,8 +1,8 @@
 "threeDarr" <-
 function (..., rep=1, union=TRUE, slicenames=NULL) 
 {
-	fun.copyright <- "Placed in the public domain 2011-2012 by Burns Statistics Ltd."
-        fun.version <- "threeDarr 003"
+	fun.copyright <- "Placed in the public domain 2011-2014 by Burns Statistics Ltd."
+        fun.version <- "threeDarr 004"
 
 	dots <- list(...)
 	ndot <- length(dots)

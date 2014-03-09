@@ -6,7 +6,7 @@ Creates a variance matrix based on the principal components of the
 variables that have no missing values.
 }
 \usage{
-factor.model.stat(x, weights = seq(1, 3, length.out = nobs), 
+factor.model.stat(x, weights = seq(0.5, 1.5, length.out = nobs), 
 	output = "full", center = TRUE, frac.var = 0.5, iter.max = 1, 
 	nfac.miss = 1, full.min = 20, reg.min = 40, sd.min = 20, 
 	quan.sd = 0.9, tol = 0.001, zero.load = FALSE, 
@@ -27,9 +27,13 @@ factor.model.stat(x, weights = seq(1, 3, length.out = nobs),
 	A column may even have all missing values.
 	}
   \item{weights}{ 
-	a single positive value (meaning equal weighting) or,
-	a vector of observation weights.
-	The length must be equal to either the original number of rows
+	a vector of observation weights, or \code{NULL}.
+
+	Equal weights can be specified with \code{NULL} or with a 
+	single positive number.
+
+	Otherwise, the length must be equal to either 
+	the original number of rows
 	in \code{x} or the number of rows in \code{x} minus the number
 	of rows that contain all missing values.
 	}
@@ -104,8 +108,10 @@ factor.model.stat(x, weights = seq(1, 3, length.out = nobs),
   \item{constant.returns.okay}{ 
 	a logical vector: if \code{TRUE}, then a column with all of its
 	non-missing values equal does not cause an error.
-	Instead the standard deviation for that column is assumed to be 
-	missing and set as if there were no data in the column.
+
+	if the true variance is thought to be non-zero, then
+	a better alternative to setting this to \code{TRUE} is to set all
+	the values in the column of \code{x} to be \code{NA}.
 	}
   \item{specific.floor}{ 
 	a number indicating how much uniquenesses should be adjusted upwards.
@@ -178,6 +184,14 @@ If \code{output} is \code{"factor"}, then an object of class
 	standard deviations in \code{sdev} are smaller than the actual
 	standard deviations in the answer.
 	}
+  \item{constant.names }{
+	A character vector giving the names of the variables that are
+	constant (if any).
+	}
+  \item{cumulative.variance.fraction }{
+	numeric vector giving the cumulative fraction of the variance 
+	explained by (all) the factors.
+	}
   \item{timestamp }{
 	character string giving the date and time the calculation
 	was completed.
@@ -242,13 +256,14 @@ that best seems like a research question.
 }
 
 \section{Revision }{
-This help was last revised 2012 February 12.
+This help was last revised 2014 March 09.
 }
 
 \author{ Burns Statistics }
 
 \seealso{ \code{\link{fitted.statfacmodBurSt}}, 
-	\code{\link{var.shrink.eqcor}}, \code{cov.wt}.
+	\code{\link{var.shrink.eqcor}}, \code{cov.wt},
+	\code{\link{slideWeight}}.
 }
 
 \examples{
